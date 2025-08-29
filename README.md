@@ -55,3 +55,22 @@ Noto Sans Devanagari: For Hindi and Marathi.
 Noto Sans Gurmukhi: For Punjabi.
 
 Noto Nastaliq Urdu: For Urdu.
+
+
+
+
+
+
+<img width="1776" height="1020" alt="Screenshot 2025-08-30 031529" src="https://github.com/user-attachments/assets/35addc7e-badc-4a05-a8d6-50793dd179c2" />
+
+<img width="1593" height="989" alt="Screenshot 2025-08-30 031547" src="https://github.com/user-attachments/assets/4889027d-39e5-4b95-924f-ef890813f961" />
+
+<img width="1309" height="966" alt="Screenshot 2025-08-30 031556" src="https://github.com/user-attachments/assets/3f2efb74-8304-4451-bdfb-d8a3810164f7" />
+
+
+<img width="1043" height="860" alt="Screenshot 2025-08-30 031608" src="https://github.com/user-attachments/assets/937632e3-a6d8-4727-b96a-fd84a8189c11" />
+
+
+
+
+
