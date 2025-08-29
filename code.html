@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Indian languages (used as fallback) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Default font for English */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+        .lang-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .lang-btn.active {
+            background-color: black;
+            color: white;
+            border-color: black;
+        }
+        .lang-btn:not(.active) {
+            background-color: white;
+            color: black;
+            border-color: #e5e7eb; /* gray-200 */
+        }
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4ade80; /* green-400 */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4ade80; /* green-400 */
+        }
+        /* Disable button style */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+    <div id="app" class="max-w-lg mx-auto p-4 md:p-6">
+        
+        <!-- Header with Language Switcher -->
+        <header class="grid grid-cols-3 items-center mb-8 pb-4 border-b">
+            <div class="col-start-1"></div>
+            
+            <div class="col-start-2 text-center">
+                <h1 id="main-title" class="text-3xl font-bold text-black flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M12 22c-2 0-4-2-4-4 0-2 2-4 4-4s4 2 4 4c0 2-2 4-4 4z"/><path d="M12 14V2"/><path d="M12 22a4 4 0 0 0 4-4h-8a4 4 0 0 0 4 4z"/><path d="M12 2l4 4-4 4-4-4 4-4z"/></svg>
+                    Smart Irrigation Planner
+                </h1>
+                <p id="subtitle" class="text-gray-600 mt-1 text-sm italic">The beauty of irrigation lies in its ability to turn barren land into a flourishing oasis.</p>
+            </div>
+
+            <div id="language-catalog" class="col-start-3 justify-self-end flex flex-wrap justify-end gap-2">
+                <button data-lang="en" class="lang-btn text-xs font-semibold px-3 py-1 rounded-md border">English</button>
+                <button data-lang="hi" class="lang-btn text-sm font-semibold px-3 py-1 rounded-md border">हिन्दी</button>
+                <button data-lang="mr" class="lang-btn text-sm font-semibold px-3 py-1 rounded-md border">मराठी</button>
+                <button data-lang="pa" class="lang-btn text-sm font-semibold px-3 py-1 rounded-md border">ਪੰਜਾਬੀ</button>
+                <button data-lang="ur" class="lang-btn text-sm font-semibold px-3 py-1 rounded-md border">اردو</button>
+            </div>
+        </header>
+
+        <!-- Location and Crop Setup -->
+        <div id="setup-section" class="bg-white p-6 rounded-2xl card-shadow border border-gray-200 mb-6 fade-in">
+            <h2 id="setup-title" class="text-xl font-semibold mb-4 text-center">Farm Setup</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="location" id="location-label" class="block text-sm font-medium text-gray-800">Location</label>
+                    <input type="text" id="location" value="Dahmi Kalan, Rajasthan" class="mt-1 block w-full bg-gray-100 border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm p-3">
+                </div>
+                <div>
+                    <label for="crop" id="crop-label" class="block text-sm font-medium text-gray-800">Crop</label>
+                    <select id="crop" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-black focus:border-black sm:text-sm p-3">
+                        <option value="Mustard">Mustard (सरसों)</option>
+                        <option value="Bajra">Bajra (बाजरा)</option>
+                        <option value="Wheat">Wheat (गेਹूँ)</option>
+                        <option value="Guar">Guar (ग्वार)</option>
+                    </select>
+                </div>
+                <button id="get-plan-btn" class="w-full bg-black text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300 shadow-lg">
+                    Get My Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Recommendation Dashboard (Initially Hidden) -->
+        <div id="dashboard-section" class="hidden">
+            <div id="recommendation-card" class="rounded-2xl p-6 text-center card-shadow transition-all duration-500">
+                <div id="icon" class="text-6xl mb-3"></div>
+                <h2 id="recommendation-headline" class="text-2xl font-bold mb-2"></h2>
+                <p id="recommendation-reason" class="text-lg"></p>
+            </div>
+
+            <!-- Automated Irrigation Panel -->
+            <div class="bg-white p-6 rounded-2xl card-shadow border border-gray-200 mt-6">
+                <h3 id="iot-title" class="text-lg font-semibold mb-4 text-center border-b pb-2">Automated Irrigation</h3>
+                <div class="grid grid-cols-2 gap-4 items-start mt-4">
+                    <!-- Column 1: Manual Control -->
+                    <div class="text-center">
+                        <p id="valve-label" class="font-semibold mb-2">Water Valve</p>
+                        <div class="relative inline-block w-14 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="valve-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="valve-toggle" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                        <p id="soil-label" class="font-semibold mt-4">Soil Moisture</p>
+                        <p id="soil-moisture" class="text-2xl font-bold text-blue-600">45%</p>
+                    </div>
+                    <!-- Column 2: Timer Control -->
+                    <div class="text-center">
+                        <p id="timer-label" class="font-semibold mb-2">Timer</p>
+                        <div class="flex items-center justify-center">
+                            <input type="number" id="timer-input" class="w-20 text-center border-gray-300 rounded-md shadow-sm p-2" placeholder="min">
+                            <button id="timer-start-btn" class="ml-2 bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition">Start</button>
+                        </div>
+                        <p id="timer-display" class="text-2xl font-bold text-gray-700 mt-4 h-8"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IOT Controls Panel -->
+            <div class="bg-white p-6 rounded-2xl card-shadow border border-gray-200 mt-6">
+                <h3 id="alerts-title" class="text-lg font-semibold mb-4 text-center border-b pb-2">IOT Controls</h3>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <!-- Left Column: Alerts -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-sm">
+                            <span id="movement-alert-label">Movement Alert</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" name="toggle" id="movement-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                <label for="movement-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span id="fire-alert-label">Fire Alert</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" name="toggle" id="fire-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                <label for="fire-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span id="weather-alert-label">Weather Alert</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" name="toggle" id="weather-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="weather-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Column: Offline Mode -->
+                    <div class="text-center border-l pl-4">
+                        <p id="offline-mode-label" class="font-semibold mb-2">Offline Mode</p>
+                         <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                            <input type="checkbox" name="toggle" id="offline-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="offline-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                        <p id="offline-mode-desc" class="text-xs text-gray-500 mt-2">This mode will automatically start when the network coverage in the area is disrupted.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- New Statistics Section -->
+            <div class="bg-white p-6 rounded-2xl card-shadow border border-gray-200 mt-6">
+                <h3 id="stats-title" class="text-lg font-semibold mb-4 text-center border-b pb-2">Weekly Statistics</h3>
+                <div id="stats-table-container" class="mt-4 space-y-2">
+                    <!-- Header Row -->
+                    <div class="grid grid-cols-5 gap-2 text-center font-bold text-sm border-b pb-2">
+                        <div id="stats-header-day">Day</div>
+                        <div id="stats-header-soil">Soil</div>
+                        <div id="stats-header-temp">Temp</div>
+                        <div id="stats-header-irrigation">Irrigation</div>
+                        <div id="stats-header-rainfall">Rainfall</div>
+                    </div>
+                    <!-- Data rows will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TRANSLATION DATA ---
+        const translations = {
+            en: {
+                mainTitle: "Smart Irrigation Planner",
+                subtitle: "The beauty of irrigation lies in its ability to turn barren land into a flourishing oasis.",
+                setupTitle: "Farm Setup",
+                locationLabel: "Location",
+                cropLabel: "Crop",
+                getPlanBtn: "Get My Plan",
+                iotTitle: "Automated Irrigation",
+                soilLabel: "Soil Moisture",
+                valveLabel: "Water Valve",
+                timerLabel: "Timer",
+                timerStartBtn: "Start",
+                alertsTitle: "IOT Controls",
+                movementAlertLabel: "Movement Alert",
+                fireAlertLabel: "Fire Alert",
+                weatherAlertLabel: "Weather Alert",
+                offlineModeLabel: "Offline Mode",
+                offlineModeDesc: "This mode will automatically start when the network coverage in the area is disrupted.",
+                statsTitle: "Weekly Statistics",
+                statsHeaderDay: "Day",
+                statsHeaderSoil: "Soil (%)",
+                statsHeaderTemp: "Temp (°C)",
+                statsHeaderIrrigation: "Irr (min)",
+                statsHeaderRainfall: "Rain (min)",
+                rec_noWatering: "No watering needed today.",
+                rec_rainExpected: "Rain is expected soon.",
+                rec_urgentAlert: "Urgent Watering Alert!",
+                rec_urgentReason: (mins) => `Run pump for ${mins} mins. High heat detected.`,
+                rec_recommended: "Watering Recommended.",
+                rec_recommendedReason: (mins) => `Run pump for ${mins} mins this evening.`,
+                rec_optimal: "Soil moisture is optimal."
+            },
+            hi: {
+                mainTitle: "स्मार्ट सिंचाई योजनाकार",
+                subtitle: "सिंचाई की सुंदरता बंजर भूमि को एक फलते-फूलते नखलिस्तान में बदलने की क्षमता में निहित है।",
+                setupTitle: "खेत की जानकारी",
+                locationLabel: "स्थान",
+                cropLabel: "फसल",
+                getPlanBtn: "मेरा प्लान पाएं",
+                iotTitle: "स्वचालित सिंचाई",
+                soilLabel: "मिट्टी की नमी",
+                valveLabel: "पानी का वाल्व",
+                timerLabel: "टाइमर",
+                timerStartBtn: "शुरू",
+                alertsTitle: "IOT नियंत्रण",
+                movementAlertLabel: "गतिविधि अलर्ट",
+                fireAlertLabel: "आग अलर्ट",
+                weatherAlertLabel: "मौसम अलर्ट",
+                offlineModeLabel: "ऑफलाइन मोड",
+                offlineModeDesc: "यह मोड तब स्वचालित रूप से शुरू हो जाएगा जब क्षेत्र में नेटवर्क कवरेज बाधित हो जाएगा।",
+                statsTitle: "साप्ताहिक आँकड़े",
+                statsHeaderDay: "दिन",
+                statsHeaderSoil: "नमी (%)",
+                statsHeaderTemp: "ताप (°C)",
+                statsHeaderIrrigation: "सिंच (मिनट)",
+                statsHeaderRainfall: "वर्षा (मिनट)",
+                rec_noWatering: "आज सिंचाई की आवश्यकता नहीं है।",
+                rec_rainExpected: "जल्द ही बारिश की उम्मीद है।",
+                rec_urgentAlert: "तुरंत सिंचाई चेतावनी!",
+                rec_urgentReason: (mins) => `पंप को ${mins} मिनट तक चलाएं। तेज गर्मी का पता चला है।`,
+                rec_recommended: "सिंचाई का सुझाव है।",
+                rec_recommendedReason: (mins) => `आज शाम पंप को ${mins} मिनट तक चलाएं।`,
+                rec_optimal: "मिट्टी की नमी इष्टतम है।"
+            },
+            mr: {
+                mainTitle: "स्मार्ट सिंचन नियोजक",
+                subtitle: "सिंचनाचे सौंदर्य पडीक जमिनीला एका समृद्ध মরূद्यानात बदलण्याच्या क्षमतेमध्ये आहे.",
+                setupTitle: "शेतीची माहिती",
+                locationLabel: "ठिकाण",
+                cropLabel: "पीक",
+                getPlanBtn: "माझी योजना मिळवा",
+                iotTitle: "स्वयंचलित सिंचन",
+                soilLabel: "मातीचा ओलावा",
+                valveLabel: "पाण्याचा झडप",
+                timerLabel: "टाइमर",
+                timerStartBtn: "सुरू करा",
+                alertsTitle: "IOT नियंत्रणे",
+                movementAlertLabel: "हालचाल सूचना",
+                fireAlertLabel: "आग सूचना",
+                weatherAlertLabel: "हवामान सूचना",
+                offlineModeLabel: "ऑफलाइन मोड",
+                offlineModeDesc: "जेव्हा परिसरातील नेटवर्क कव्हरेज विस्कळीत होईल तेव्हा हा मोड स्वयंचलितपणे सुरू होईल.",
+                statsTitle: "साप्ताहिक आकडेवारी",
+                statsHeaderDay: "दिवस",
+                statsHeaderSoil: "आर्द्रता (%)",
+                statsHeaderTemp: "ताप (°C)",
+                statsHeaderIrrigation: "सिंचन (मिनिट)",
+                statsHeaderRainfall: "पाऊस (मिनिट)",
+                rec_noWatering: "आज पाणी देण्याची गरज नाही।",
+                rec_rainExpected: "लवकरच पावसाची अपेक्षा आहे।",
+                rec_urgentAlert: "तात्काळ सिंचन सूचना!",
+                rec_urgentReason: (mins) => `पंप ${mins} मिनिटे चालवा. जास्त उष्णता आढळली आहे.`,
+                rec_recommended: "सिंचनाची शिफारस आहे.",
+                rec_recommendedReason: (mins) => `आज संध्याकाळी पंप ${mins} मिनिटे चालवा.`,
+                rec_optimal: "मातीचा ओलावा योग्य आहे."
+            },
+            pa: {
+                mainTitle: "ਸਮਾਰਟ ਸਿੰਚਾਈ ਯੋਜਨਾਕਾਰ",
+                subtitle: "ਸਿੰਚਾਈ ਦੀ ਸੁੰਦਰਤਾ ਬੰਜਰ ਜ਼ਮੀਨ ਨੂੰ ਇੱਕ ਫਲਦੇ-ਫੁੱਲਦੇ ਨਖਲਿਸਤਾਨ ਵਿੱਚ ਬਦਲਣ ਦੀ ਯੋਗਤਾ ਵਿੱਚ ਹੈ।",
+                setupTitle: "ਖੇਤ ਦੀ ਜਾਣਕਾਰੀ",
+                locationLabel: "ਸਥਾਨ",
+                cropLabel: "ਫਸਲ",
+                getPlanBtn: "ਮੇਰੀ ਯੋਜਨਾ ਪ੍ਰਾਪਤ ਕਰੋ",
+                iotTitle: "ਆਟੋਮੈਟਿਕ ਸਿੰਚਾਈ",
+                soilLabel: "ਮਿੱਟੀ ਦੀ ਨਮੀ",
+                valveLabel: "ਪਾਣੀ ਦਾ ਵਾਲਵ",
+                timerLabel: "ਟਾਈਮਰ",
+                timerStartBtn: "ਸ਼ੁਰੂ ਕਰੋ",
+                alertsTitle: "IOT ਕੰਟਰੋਲ",
+                movementAlertLabel: "ਗਤੀਵਿਧੀ ਚੇਤਾਵਨੀ",
+                fireAlertLabel: "ਅੱਗ ਚੇਤਾਵਨੀ",
+                weatherAlertLabel: "ਮੌਸਮ ਚੇਤਾਵਨੀ",
+                offlineModeLabel: "ਔਫਲਾਈਨ ਮੋਡ",
+                offlineModeDesc: "ਇਹ ਮੋਡ ਉਦੋਂ ਆਪਣੇ ਆਪ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗਾ ਜਦੋਂ ਖੇਤਰ ਵਿੱਚ ਨੈੱਟਵਰਕ ਕਵਰੇਜ ਵਿੱਚ ਵਿਘਨ ਪੈਂਦਾ ਹੈ।",
+                statsTitle: "ਹਫਤਾਵਾਰੀ ਅੰਕੜੇ",
+                statsHeaderDay: "ਦਿਨ",
+                statsHeaderSoil: "ਨਮੀ (%)",
+                statsHeaderTemp: "ਤਾਪਮਾਨ (°C)",
+                statsHeaderIrrigation: "ਸਿੰਚਾਈ (ਮਿੰਟ)",
+                statsHeaderRainfall: "ਮੀਂਹ (ਮਿੰਟ)",
+                rec_noWatering: "ਅੱਜ ਪਾਣੀ ਦੇਣ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।",
+                rec_rainExpected: "ਜਲਦੀ ਹੀ ਮੀਂਹ ਪੈਣ ਦੀ ਉਮੀਦ ਹੈ।",
+                rec_urgentAlert: "ਤੁਰੰਤ ਸਿੰਚਾਈ ਚੇਤਾਵਨੀ!",
+                rec_urgentReason: (mins) => `ਪੰਪ ਨੂੰ ${mins} ਮਿੰਟ ਚਲਾਓ। ਜ਼ਿਆਦਾ ਗਰਮੀ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ।`,
+                rec_recommended: "ਪਾਣੀ ਦੇਣ ਦੀ ਸਿਫਾਰਸ਼ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।",
+                rec_recommendedReason: (mins) => `ਅੱਜ ਸ਼ਾਮ ਨੂੰ ਪੰਪ ${mins} ਮਿੰਟ ਚਲਾਓ।`,
+                rec_optimal: "ਮਿੱਟੀ ਦੀ ਨਮੀ ਅਨੁਕੂਲ ਹੈ।"
+            },
+            ur: {
+                mainTitle: "اسمارٹ آبپاشی کا منصوبہ ساز",
+                subtitle: "آبپاشی کی خوبصورتی بنجر زمین کو ایک سرسبز نخلستان میں تبدیل کرنے کی صلاحیت میں ہے۔",
+                setupTitle: "فارم سیٹ اپ",
+                locationLabel: "مقام",
+                cropLabel: "فصل",
+                getPlanBtn: "میرا منصوبہ حاصل کریں",
+                iotTitle: "خودکار آبپاشی",
+                soilLabel: "مٹی کی نمی",
+                valveLabel: "پانی کا والو",
+                timerLabel: "ٹائمر",
+                timerStartBtn: "شروع کریں",
+                alertsTitle: "IOT کنٹرولز",
+                movementAlertLabel: "نقل و حرکت کا الرٹ",
+                fireAlertLabel: "آگ کا الرٹ",
+                weatherAlertLabel: "موسم کا الرٹ",
+                offlineModeLabel: "آف لائن موڈ",
+                offlineModeDesc: "یہ موڈ خود بخود شروع ہو جائے گا جب علاقے میں نیٹ ورک کوریج میں خلل پڑے گا۔",
+                statsTitle: "ہفتہ وار اعداد و شمار",
+                statsHeaderDay: "دن",
+                statsHeaderSoil: "نمی (%)",
+                statsHeaderTemp: "درجہ حرارت (°C)",
+                statsHeaderIrrigation: "آبپاشی (منٹ)",
+                statsHeaderRainfall: "بارش (منٹ)",
+                rec_noWatering: "آج پانی دینے کی ضرورت نہیں۔",
+                rec_rainExpected: "جلد ہی بارش کی توقع ہے۔",
+                rec_urgentAlert: "فوری پانی دینے کا الرٹ!",
+                rec_urgentReason: (mins) => `پمپ کو ${mins} منٹ تک چلائیں۔ شدید گرمی کا پتہ چلا ہے۔`,
+                rec_recommended: "پانی دینے کی سفارش کی جاتی ہے۔",
+                rec_recommendedReason: (mins) => `آج شام پمپ کو ${mins} منٹ تک چلائیں۔`,
+                rec_optimal: "مٹی کی نمی بہترین ہے۔"
+            }
+        };
+
+        // --- MOCK DATA & LOGIC ---
+        const weatherData = { temp: 31, humidity: 75, rainChance: 5 };
+        const sensorData = { soilMoisture: 45 };
+        const cropData = {
+            'Mustard': { waterNeeds: 1.2 },
+            'Bajra': { waterNeeds: 0.8 },
+            'Wheat': { waterNeeds: 1.0 },
+            'Guar': { waterNeeds: 0.7 }
+        };
+        const weeklyChartData = {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            soil: [60, 55, 58, 52, 48, 45, 55],
+            tempHigh: [35, 36, 37, 36, 38, 39, 37],
+            tempLow: [24, 25, 25, 26, 27, 28, 26],
+            irrigation: [0, 20, 0, 25, 30, 35, 0],
+            rainfall: [10, 0, 15, 0, 0, 0, 20]
+        };
+
+        // --- DOM ELEMENTS ---
+        const appElement = document.getElementById('app');
+        const getPlanBtn = document.getElementById('get-plan-btn');
+        const setupSection = document.getElementById('setup-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const cropSelect = document.getElementById('crop');
+        const languageCatalog = document.getElementById('language-catalog');
+        let currentLang = 'en';
+
+        const recommendationCard = document.getElementById('recommendation-card');
+        const icon = document.getElementById('icon');
+        const headline = document.getElementById('recommendation-headline');
+        const reason = document.getElementById('recommendation-reason');
+        const valveToggle = document.getElementById('valve-toggle');
+        const timerInput = document.getElementById('timer-input');
+        const timerStartBtn = document.getElementById('timer-start-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        let countdownInterval;
+        
+        // --- EVENT LISTENERS ---
+        getPlanBtn.addEventListener('click', () => {
+            const recommendation = calculateRecommendation();
+            updateDashboard(recommendation);
+            setupSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            dashboardSection.classList.add('fade-in');
+            renderStatsTable();
+        });
+
+        languageCatalog.addEventListener('click', (event) => {
+            const lang = event.target.closest('.lang-btn')?.dataset.lang;
+            if (lang) {
+                currentLang = lang;
+                changeLanguage(lang);
+            }
+        });
+
+        valveToggle.addEventListener('change', (event) => {
+            const status = event.target.checked ? 'ON' : 'OFF';
+            console.log(`Water valve manually turned ${status}`);
+            if (!event.target.checked && countdownInterval) {
+                clearInterval(countdownInterval);
+                timerDisplay.textContent = '';
+                timerStartBtn.disabled = false;
+                timerInput.disabled = false;
+            }
+        });
+
+        timerStartBtn.addEventListener('click', () => {
+            const minutes = parseInt(timerInput.value, 10);
+            if (isNaN(minutes) || minutes <= 0) return;
+
+            let totalSeconds = minutes * 60;
+            valveToggle.checked = true;
+            timerStartBtn.disabled = true;
+            timerInput.disabled = true;
+
+            countdownInterval = setInterval(() => {
+                const mins = Math.floor(totalSeconds / 60);
+                const secs = totalSeconds % 60;
+                timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                
+                if (totalSeconds <= 0) {
+                    clearInterval(countdownInterval);
+                    valveToggle.checked = false;
+                    timerDisplay.textContent = '';
+                    timerStartBtn.disabled = false;
+                    timerInput.disabled = false;
+                    timerInput.value = '';
+                }
+                totalSeconds--;
+            }, 1000);
+        });
+
+        // --- LANGUAGE FUNCTION ---
+        function changeLanguage(lang) {
+            const t = translations[lang];
+            
+            if (lang === 'hi' || lang === 'mr') {
+                appElement.style.fontFamily = "'Aparajita', 'Noto Sans Devanagari', sans-serif";
+                appElement.dir = 'ltr';
+            } else if (lang === 'pa') {
+                appElement.style.fontFamily = "'Aparajita', 'Noto Sans Gurmukhi', sans-serif";
+                appElement.dir = 'ltr';
+            } else if (lang === 'ur') {
+                appElement.style.fontFamily = "'Noto Nastaliq Urdu', serif";
+                appElement.dir = 'rtl';
+            } else { 
+                appElement.style.fontFamily = "'Courier New', Courier, monospace";
+                appElement.dir = 'ltr';
+            }
+
+            const mainTitleElement = document.getElementById('main-title');
+            const subtitleElement = document.getElementById('subtitle');
+            
+            const iconSVG = mainTitleElement.querySelector('svg');
+            mainTitleElement.textContent = t.mainTitle;
+            if (iconSVG) {
+                mainTitleElement.prepend(iconSVG);
+            }
+            
+            subtitleElement.textContent = t.subtitle;
+            document.getElementById('setup-title').textContent = t.setupTitle;
+            document.getElementById('location-label').textContent = t.locationLabel;
+            document.getElementById('crop-label').textContent = t.cropLabel;
+            document.getElementById('get-plan-btn').textContent = t.getPlanBtn;
+            document.getElementById('iot-title').textContent = t.iotTitle;
+            document.getElementById('soil-label').textContent = t.soilLabel;
+            document.getElementById('valve-label').textContent = t.valveLabel;
+            document.getElementById('timer-label').textContent = t.timerLabel;
+            document.getElementById('timer-start-btn').textContent = t.timerStartBtn;
+            document.getElementById('alerts-title').textContent = t.alertsTitle;
+            document.getElementById('movement-alert-label').textContent = t.movementAlertLabel;
+            document.getElementById('fire-alert-label').textContent = t.fireAlertLabel;
+            document.getElementById('weather-alert-label').textContent = t.weatherAlertLabel;
+            document.getElementById('offline-mode-label').textContent = t.offlineModeLabel;
+            document.getElementById('offline-mode-desc').textContent = t.offlineModeDesc;
+            document.getElementById('stats-title').textContent = t.statsTitle;
+            document.getElementById('stats-header-day').textContent = t.statsHeaderDay;
+            document.getElementById('stats-header-soil').textContent = t.statsHeaderSoil;
+            document.getElementById('stats-header-temp').textContent = t.statsHeaderTemp;
+            document.getElementById('stats-header-irrigation').textContent = t.statsHeaderIrrigation;
+            document.getElementById('stats-header-rainfall').textContent = t.statsHeaderRainfall;
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            if (!dashboardSection.classList.contains('hidden')) {
+                const recommendation = calculateRecommendation();
+                updateDashboard(recommendation);
+                renderStatsTable();
+            }
+        }
+
+        // --- CALCULATION ENGINE ---
+        function calculateRecommendation() {
+            const selectedCrop = cropSelect.value;
+            const t = translations[currentLang];
+            
+            let message, reasonText, iconChar, cardClasses;
+            const etFactor = (weatherData.temp / 30) * (weatherData.humidity / 80) * cropData[selectedCrop].waterNeeds;
+
+            if (weatherData.rainChance > 40) {
+                message = t.rec_noWatering;
+                reasonText = t.rec_rainExpected;
+                iconChar = '🌧️';
+                cardClasses = 'bg-white border-2 border-black text-black';
+            } else if (etFactor > 1.1) {
+                const wateringMinutes = Math.round(45 * etFactor);
+                message = t.rec_urgentAlert;
+                reasonText = t.rec_urgentReason(wateringMinutes);
+                iconChar = '🔥';
+                cardClasses = 'bg-red-600 text-white';
+            } else if (etFactor > 0.8) {
+                const wateringMinutes = Math.round(30 * etFactor);
+                message = t.rec_recommended;
+                reasonText = t.rec_recommendedReason(wateringMinutes);
+                iconChar = '💧';
+                cardClasses = 'bg-gray-200 border-2 border-black text-black';
+            } else {
+                message = t.rec_noWatering;
+                reasonText = t.rec_optimal;
+                iconChar = '✅';
+                cardClasses = 'bg-white border-2 border-black text-black';
+            }
+            return { message, reasonText, iconChar, cardClasses };
+        }
+
+        // --- UI UPDATE FUNCTION ---
+        function updateDashboard(recommendation) {
+            icon.textContent = recommendation.iconChar;
+            headline.textContent = recommendation.message;
+            reason.textContent = recommendation.reasonText;
+            recommendationCard.className = 'rounded-2xl p-6 text-center card-shadow transition-all duration-500 ' + recommendation.cardClasses;
+            document.getElementById('soil-moisture').textContent = `${sensorData.soilMoisture}%`;
+        }
+        
+        // --- RENDER STATS TABLE ---
+        function renderStatsTable() {
+            const container = document.getElementById('stats-table-container');
+            // Clear existing data rows
+            container.querySelectorAll('.data-row').forEach(row => row.remove());
+
+            weeklyChartData.labels.forEach((day, index) => {
+                const row = document.createElement('div');
+                row.className = 'data-row grid grid-cols-5 gap-2 text-center text-sm items-center';
+                row.innerHTML = `
+                    <div class="font-semibold">${day}</div>
+                    <div>${weeklyChartData.soil[index]}%</div>
+                    <div>${weeklyChartData.tempLow[index]}-${weeklyChartData.tempHigh[index]}</div>
+                    <div>${weeklyChartData.irrigation[index]}</div>
+                    <div>${weeklyChartData.rainfall[index]}</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Initialize with default language
+        changeLanguage('en');
+    </script>
+</body>
+</html>
