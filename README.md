@@ -18,7 +18,9 @@ all these features are backed the IOT , soil moisture sensors , motion sensors, 
 
 
 *tech stacks i have used in these are as follows:*
-Structure: HTML
+
+
+##Structure: HTML
 What it is: The standard markup language for creating web pages.
 
 Where it's used: The entire file is an HTML document. It defines all the structural elements you see on the page, such as the main container (<div id="app">), the header (<header>), the different panels or "cards" (<div>), buttons (<button>), and text (<h1>, <p>).
